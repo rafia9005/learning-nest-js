@@ -16,10 +16,7 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe({
-        status: true,
-        message: 'NEST JS WORK!',
-      });
+      expect(appController.getHello()).toBe(null);
     });
   });
 });

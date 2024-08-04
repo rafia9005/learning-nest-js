@@ -19,6 +19,9 @@ export class ProductService {
       where: {
         id,
       },
+      include: {
+        tag: true,
+      },
     });
   }
 

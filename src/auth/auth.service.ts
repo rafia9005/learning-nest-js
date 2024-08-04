@@ -18,6 +18,10 @@ export class AuthService {
   ) {}
 
   async login(email: string, password: string): Promise<AuthEntity> {
+    if (!email) {
+      throw new NotFoundException('Email must be provided');
+    }
+
     const user = await this.databaseService.users.findUnique({
       where: { email: email },
     });
@@ -46,6 +50,10 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<RegisterResponse> {
+    if (!email) {
+      throw new ConflictException('Email must be provided');
+    }
+
     const existingUser = await this.databaseService.users.findUnique({
       where: { email: email },
     });
@@ -56,23 +64,24 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUsers = await this.databaseService.users.create({
+    const newUser = await this.databaseService.users.create({
       data: {
         name: name,
         email: email,
         password: hashedPassword,
       },
     });
+
     const userResponse: UserResponse = {
-      id: newUsers.id,
-      name: newUsers.name,
-      email: newUsers.email,
-      createdAt: newUsers.createdAt,
-      updatedAt: newUsers.updatedAt,
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      createdAt: newUser.createdAt,
+      updatedAt: newUser.updatedAt,
     };
     return {
       status: true,
-      message: 'register is success',
+      message: 'Registration successful',
       data: userResponse,
     };
   }

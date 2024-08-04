@@ -9,11 +9,13 @@ import {
   Res,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { CreateProductDto } from './dto/create.dto';
+import { JwtAuthGuard } from 'src/utils/jwt.guard';
 
 @Controller('product')
 export class ProductController {
@@ -35,6 +37,7 @@ export class ProductController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.productService.findAll();
   }

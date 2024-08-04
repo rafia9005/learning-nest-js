@@ -7,11 +7,21 @@ export class ProductService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createProductDto: Prisma.ProductCreateInput) {
-    return this.databaseService.product.create({ data: createProductDto });
+    try {
+      return await this.databaseService.product.create({
+        data: createProductDto,
+        include: { tag: true },
+      });
+    } catch (error) {
+      return {
+        statusCode: 500,
+        message: 'Internal server error',
+      };
+    }
   }
 
   findAll() {
-    return this.databaseService.product.findMany({});
+    return this.databaseService.product.findMany({ include: { tag: true } });
   }
 
   findOne(id: number) {
@@ -21,6 +31,7 @@ export class ProductService {
       },
       include: {
         tag: true,
+        review: true,
       },
     });
   }

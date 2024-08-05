@@ -7,6 +7,7 @@ export interface JwtPayload {
   id: number;
   name: string;
   email: string;
+  verify?: boolean;
 }
 
 @Injectable()
@@ -19,6 +20,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any): Promise<JwtPayload> {
-    return { id: payload.id, name: payload.name, email: payload.email };
+    return {
+      id: payload.id,
+      name: payload.name,
+      email: payload.email,
+      verify: payload.verify,
+    };
   }
 }

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AuthEntity {
   @ApiProperty()
-  accessToken: string;
+  token: string;
 }
 
 export class RegisterResponse {
@@ -11,6 +11,9 @@ export class RegisterResponse {
 
   @ApiProperty()
   message: string;
+
+  @ApiProperty()
+  token: string;
 
   @ApiProperty()
   data: object;

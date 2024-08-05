@@ -6,10 +6,18 @@ import { ProductModule } from './product/product.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
+import { VerifyTokenService } from './middleware/verify-token.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [ConfigModule.forRoot(), DatabaseModule, ProductModule, AuthModule],
+  imports: [
+    ConfigModule.forRoot(),
+    DatabaseModule,
+    ProductModule,
+    AuthModule,
+    JwtModule,
+  ],
   controllers: [AppController, UsersController],
-  providers: [AppService],
+  providers: [AppService, VerifyTokenService],
 })
 export class AppModule {}

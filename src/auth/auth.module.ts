@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { DatabaseService } from 'src/database/database.service';
 import { JwtStrategy } from '../utils/jwt.strategy';
+import { VerifyTokenService } from 'src/middleware/verify-token.service';
 
 export const jwtSecret = 'zjP9h6ZI5LoSKCRj';
 
@@ -17,6 +18,6 @@ export const jwtSecret = 'zjP9h6ZI5LoSKCRj';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, DatabaseService, JwtStrategy],
+  providers: [AuthService, DatabaseService, JwtStrategy, VerifyTokenService],
 })
 export class AuthModule {}

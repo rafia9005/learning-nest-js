@@ -10,19 +10,21 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { CreateProductDto } from './dto/create.dto';
 import { JwtAuthGuard } from 'src/utils/jwt.guard';
+import { ProductResponse } from './entity/product.entity';
 
-@Controller('product')
+@Controller('api/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
   async create(@Body() createProductDto: CreateProductDto) {
     try {
@@ -38,6 +40,7 @@ export class ProductController {
   }
 
   @Get()
+  //@UseGuards(JwtAuthGuard)
   findAll() {
     return this.productService.findAll();
   }
@@ -59,7 +62,7 @@ export class ProductController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   update(
     @Param('id') id: string,
     @Body() updateProductDto: Prisma.ProductUpdateInput,
@@ -71,5 +74,11 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.productService.remove(+id);
+  }
+
+  // create search product
+  @Get('search')
+  async search(@Query('query') query: string): Promise<ProductResponse[]> {
+    return this.productService.searchByName(query);
   }
 }

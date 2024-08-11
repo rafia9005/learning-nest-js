@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersController } from './users/users.controller';
 import { VerifyTokenService } from './middleware/verify-token.service';
 import { JwtModule } from '@nestjs/jwt';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
     ProductModule,
     AuthModule,
     JwtModule,
+    ReviewModule,
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, VerifyTokenService],

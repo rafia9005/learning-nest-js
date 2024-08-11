@@ -16,24 +16,52 @@ export class ProductService {
       return {
         statusCode: 500,
         message: 'Internal server error',
+        errors: error,
       };
     }
   }
 
-  findAll() {
-    return this.databaseService.product.findMany({ include: { tag: true } });
+  async findAll() {
+    const products = await this.databaseService.product.findMany({
+      include: { tag: true },
+    });
+
+    return products.map((product) => ({
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      tag: product.tag,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+    }));
   }
 
-  findOne(id: number) {
-    return this.databaseService.product.findUnique({
+  async findOne(id: number) {
+    const product = await this.databaseService.product.findUnique({
       where: {
-        id,
+        id: id,
       },
       include: {
         tag: true,
         review: true,
       },
     });
+
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    return {
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      tag: product.tag,
+      review: product.review,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+    };
   }
 
   update(id: number, updateProductDto: Prisma.ProductUpdateInput) {
@@ -51,5 +79,17 @@ export class ProductService {
         id,
       },
     });
+  }
+
+  async searchByName(name: string) {
+    try {
+      const products = await this.databaseService.product.findMany({
+        include: { tag: true },
+      });
+      return products;
+    } catch (error) {
+      console.error('Error searching products by name:', error);
+      throw new Error('Internal server error');
+    }
   }
 }

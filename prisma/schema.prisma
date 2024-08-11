@@ -16,6 +16,20 @@ model Users {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   VerifyToken VerifyToken?
+  Contact     Contact[]
+
+  @@map("users")
+}
+
+model Contact {
+  id         Int     @id @default(autoincrement())
+  frist_name String?
+  last_name  String?
+  phone      String?
+  users      Users   @relation(fields: [userId], references: [id])
+  userId     Int     @unique
+
+  @@map("contacts")
 }
 
 model VerifyToken {
@@ -23,17 +37,21 @@ model VerifyToken {
   token   String?
   users   Users   @relation(fields: [usersId], references: [id])
   usersId Int     @unique()
+
+  @@map("verify-token")
 }
 
 model Product {
   id          Int      @id @default(autoincrement())
   title       String
-  description String
+  description String    @db.Text
   price       Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   tag         Tag[]
   review      Review[]
+
+  @@map("products")
 }
 
 model Tag {
@@ -41,6 +59,8 @@ model Tag {
   name      String
   product   Product @relation(fields: [productId], references: [id])
   productId Int
+
+  @@map("tags")
 }
 
 model Review {
@@ -49,4 +69,6 @@ model Review {
   rating    Int
   product   Product @relation(fields: [productId], references: [id])
   productId Int
+
+  @@map("reviews")
 }

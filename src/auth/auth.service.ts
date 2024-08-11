@@ -11,6 +11,7 @@ import { AuthEntity, RegisterResponse } from './entity/auth.entity';
 import * as bcrypt from 'bcrypt';
 import { UserResponse } from './entity/auth.entity';
 import { VerifyTokenService } from 'src/middleware/verify-token.service';
+import { decode } from 'punycode';
 
 @Injectable()
 export class AuthService {
@@ -44,7 +45,6 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-        verify: user.verify,
       }),
     };
   }
@@ -99,13 +99,11 @@ export class AuthService {
       id: newUser.id,
       name: newUser.name,
       email: newUser.email,
-      verify: newUser.verify,
     });
 
     return {
       status: true,
-      message:
-        'Registration successful. Please check your email to verify your account.',
+      message: `Registration successful. Please check your email to verify your account. ${newUser.email}`,
       token: accessToken,
       data: userResponse,
     };

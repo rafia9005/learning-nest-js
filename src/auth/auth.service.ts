@@ -11,7 +11,6 @@ import { AuthEntity, RegisterResponse } from './entity/auth.entity';
 import * as bcrypt from 'bcrypt';
 import { UserResponse } from './entity/auth.entity';
 import { VerifyTokenService } from 'src/middleware/verify-token.service';
-import { decode } from 'punycode';
 
 @Injectable()
 export class AuthService {

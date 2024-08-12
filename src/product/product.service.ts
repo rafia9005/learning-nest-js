@@ -80,16 +80,4 @@ export class ProductService {
       },
     });
   }
-
-  async searchByName(name: string) {
-    try {
-      const products = await this.databaseService.product.findMany({
-        include: { tag: true },
-      });
-      return products;
-    } catch (error) {
-      console.error('Error searching products by name:', error);
-      throw new Error('Internal server error');
-    }
-  }
 }

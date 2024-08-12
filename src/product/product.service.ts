@@ -7,25 +7,19 @@ export class ProductService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(createProductDto: Prisma.ProductCreateInput) {
-    try {
-      return await this.databaseService.product.create({
-        data: createProductDto,
-        include: { tag: true },
-      });
-    } catch (error) {
-      return {
-        statusCode: 500,
-        message: 'Internal server error',
-        errors: error,
-      };
-    }
+    return await this.databaseService.product.create({
+      data: createProductDto,
+      include: { tag: true },
+    });
   }
 
   async findAll() {
     const products = await this.databaseService.product.findMany({
       include: { tag: true },
     });
-
+    if (!products) {
+      return null;
+    }
     return products.map((product) => ({
       id: product.id,
       title: product.title,
@@ -49,7 +43,7 @@ export class ProductService {
     });
 
     if (!product) {
-      throw new Error('Product not found');
+      return null;
     }
 
     return {

@@ -10,49 +10,69 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
-  Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 import { CreateProductDto } from './dto/create.dto';
 import { JwtAuthGuard } from 'src/utils/jwt.guard';
-import { ProductResponse } from './entity/product.entity';
 
 @Controller('api/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
-
   @Post()
   //@UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async create(@Body() createProductDto: CreateProductDto) {
+  async create(
+    @Body() createProductDto: CreateProductDto,
+    @Res() res: Response,
+  ) {
     try {
       const result = await this.productService.create(createProductDto);
-      return { statusCode: 201, data: result };
+      return res.status(201).json({
+        status: true,
+        message: 'success',
+        data: result,
+      });
     } catch (error) {
       console.error('Error creating product:', error);
-      return {
+      return res.status(500).json({
         statusCode: 500,
         message: 'Internal server error',
-      };
+      });
     }
   }
 
   @Get()
-  //@UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.productService.findAll();
+  async findAll(@Res() res: Response) {
+    const result = await this.productService.findAll();
+    const nowDate = new Date();
+    if (result) {
+      return res.status(200).json({
+        status: true,
+        message: 'success',
+        data: result,
+        current_date: nowDate,
+      });
+    } else {
+      return res.status(404).json({
+        status: false,
+        message: 'product is empty',
+        current_date: nowDate,
+      });
+    }
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() response: Response) {
     const data = await this.productService.findOne(+id);
     if (data) {
+      const nowDate = new Date();
       return response.status(200).json({
         status: true,
         message: 'succes',
         data,
+        current_date: nowDate,
       });
     } else {
       return response.status(404).json({
@@ -74,11 +94,5 @@ export class ProductController {
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.productService.remove(+id);
-  }
-
-  // create search product
-  @Get('search')
-  async search(@Query('query') query: string): Promise<ProductResponse[]> {
-    return this.productService.searchByName(query);
   }
 }

@@ -2,7 +2,7 @@
 
 ## Deskripsi
 
-Proyek ini adalah aplikasi belajar menggunakan [NestJS](https://nestjs.com/), framework untuk membangun aplikasi backend yang efisien dan skalabel dengan Node.js. Proyek ini mencakup implementasi beberapa fitur dasar seperti pembuatan dan pengelolaan produk, ulasan, dan tag dengan Prisma sebagai ORM untuk berinteraksi dengan database.
+Proyek ini adalah aplikasi belajar menggunakan [NestJS](https://nestjs.com/), framework untuk membangun aplikasi backend yang efisien dan skalabel dengan Node.js. Proyek ini mencakup implementasi beberapa fitur dasar seperti pembuatan dan pengelolaan produk, ulasan, dan tag dengan Prisma sebagai ORM untuk berinteraksi dengan Database.
 
 ## Fitur
 

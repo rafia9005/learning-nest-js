@@ -11,11 +11,14 @@ import {
   UseGuards,
   HttpException,
   HttpStatus,
+  Query,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Prisma } from '@prisma/client';
 import { CreateProductDto } from './dto/create.dto';
 import { JwtAuthGuard } from 'src/utils/jwt.guard';
+import { profile } from 'console';
 
 @Controller('api/product')
 export class ProductController {
@@ -100,6 +103,27 @@ export class ProductController {
       };
     } catch (error) {
       throw error;
+    }
+  }
+
+  @Get('search')
+  async search(@Query('query') query: string) {
+    try {
+      const products = await this.productService.search(query);
+      if (products.length > 0) {
+        return {
+          status: true,
+          message: 'Products found',
+          data: products,
+        };
+      } else {
+        return {
+          status: false,
+          message: 'No products found',
+        };
+      }
+    } catch (error) {
+      //throw new InternalServerErrorException('Failed to retrieve products');
     }
   }
 }

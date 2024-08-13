@@ -102,4 +102,24 @@ export class ProductService {
       throw new InternalServerErrorException('Failed to delete product');
     }
   }
+
+  async search(query: string) {
+    try {
+      const products = await this.databaseService.product.findMany({
+        where: {
+          title: {
+            contains: query,
+          },
+        },
+        include: {
+          tag: true,
+        },
+      });
+      console.log(products);
+      return products;
+    } catch (error) {
+      console.error('Error in search method:', error);
+      throw new InternalServerErrorException('Failed to search products');
+    }
+  }
 }

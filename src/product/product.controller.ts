@@ -6,93 +6,100 @@ import {
   Patch,
   Param,
   Delete,
-  Res,
   UsePipes,
   ValidationPipe,
   UseGuards,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Prisma } from '@prisma/client';
-import { Response } from 'express';
 import { CreateProductDto } from './dto/create.dto';
 import { JwtAuthGuard } from 'src/utils/jwt.guard';
 
 @Controller('api/product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
+
   @Post()
   //@UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async create(
-    @Body() createProductDto: CreateProductDto,
-    @Res() res: Response,
-  ) {
+  async create(@Body() createProductDto: CreateProductDto) {
     try {
       const result = await this.productService.create(createProductDto);
-      return res.status(201).json({
+      return {
         status: true,
-        message: 'success',
-        data: result,
-      });
+        message: 'Product created successfully',
+        data: JSON.stringify(result),
+      };
     } catch (error) {
-      console.error('Error creating product:', error);
-      return res.status(500).json({
-        statusCode: 500,
-        message: 'Internal server error',
-      });
+      throw error;
     }
   }
 
   @Get()
-  async findAll(@Res() res: Response) {
-    const result = await this.productService.findAll();
+  async findAll() {
+    const products = await this.productService.findAll();
     const nowDate = new Date();
-    if (result) {
-      return res.status(200).json({
+    if (products.length > 0) {
+      return {
         status: true,
-        message: 'success',
-        data: result,
+        message: 'Products retrieved successfully',
+        data: products,
         current_date: nowDate,
-      });
+      };
     } else {
-      return res.status(404).json({
+      return {
         status: false,
-        message: 'product is empty',
+        message: 'No products found',
         current_date: nowDate,
-      });
+      };
     }
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Res() response: Response) {
-    const data = await this.productService.findOne(+id);
-    if (data) {
-      const nowDate = new Date();
-      return response.status(200).json({
-        status: true,
-        message: 'succes',
-        data,
-        current_date: nowDate,
-      });
-    } else {
-      return response.status(404).json({
-        message: 'not found',
-      });
-    }
+  async findOne(@Param('id') id: string) {
+    const product = await this.productService.findOne(+id);
+    return {
+      status: true,
+      message: 'Product retrieved successfully',
+      data: product,
+      current_date: new Date(),
+    };
   }
 
   @Patch(':id')
   //@UseGuards(JwtAuthGuard)
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateProductDto: Prisma.ProductUpdateInput,
   ) {
-    return this.productService.update(+id, updateProductDto);
+    try {
+      const updatedProduct = await this.productService.update(
+        +id,
+        updateProductDto,
+      );
+      return {
+        status: true,
+        message: 'Product updated successfully',
+        data: updatedProduct,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  //@UseGuards(JwtAuthGuard)
+  async remove(@Param('id') id: string) {
+    try {
+      await this.productService.remove(+id);
+      return {
+        status: true,
+        message: 'Product deleted successfully',
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }

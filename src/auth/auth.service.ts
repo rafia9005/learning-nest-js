@@ -22,11 +22,11 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<AuthEntity> {
     if (!email) {
-      throw new NotFoundException('Email must be provided');
+      throw new BadRequestException('Email must be provided');
     }
 
     const user = await this.databaseService.users.findUnique({
-      where: { email: email },
+      where: { email },
     });
 
     if (!user) {
@@ -39,13 +39,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password');
     }
 
-    return {
-      token: this.jwtService.sign({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      }),
-    };
+    const token = this.generateToken(user);
+    return { token };
   }
 
   async register(
@@ -54,28 +49,28 @@ export class AuthService {
     password: string,
   ): Promise<RegisterResponse> {
     if (!email) {
-      throw new ConflictException('Email must be provided');
+      throw new BadRequestException('Email must be provided');
     }
 
     const existingUser = await this.databaseService.users.findUnique({
-      where: { email: email },
+      where: { email },
     });
 
     if (existingUser) {
       throw new ConflictException('Email already in use');
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await this.hashPassword(password);
 
     const newUser = await this.databaseService.users.create({
       data: {
-        name: name,
-        email: email,
+        name,
+        email,
         password: hashedPassword,
       },
     });
 
-    const verifyToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const verifyToken = this.generateVerificationToken();
 
     await this.databaseService.verifyToken.create({
       data: {
@@ -86,41 +81,29 @@ export class AuthService {
 
     await this.emailService.sendVerificationEmail(newUser.email, verifyToken);
 
-    const userResponse: UserResponse = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-      createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt,
-    };
-
-    const accessToken = this.jwtService.sign({
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-    });
+    const userResponse: UserResponse = this.createUserResponse(newUser);
+    const accessToken = this.generateToken(newUser);
 
     return {
       status: true,
-      message: `Registration successful. Please check your email to verify your account. ${newUser.email}`,
+      message: `Registration successful. Please check your email to verify your account ${newUser.email}`,
       token: accessToken,
       data: userResponse,
     };
   }
+
   async verifyToken(
     token: string,
     bearerToken: string,
   ): Promise<{ status: boolean; message: string }> {
-    const decoded = this.jwtService.decode(bearerToken) as { id: number };
+    const decoded = this.decodeToken(bearerToken);
 
     if (!decoded || !decoded.id) {
       throw new BadRequestException('Invalid token');
     }
 
-    const userId = decoded.id;
-
     const verifyToken = await this.databaseService.verifyToken.findUnique({
-      where: { usersId: userId },
+      where: { usersId: decoded.id },
     });
 
     if (!verifyToken || verifyToken.token !== token) {
@@ -128,7 +111,7 @@ export class AuthService {
     }
 
     await this.databaseService.users.update({
-      where: { id: userId },
+      where: { id: decoded.id },
       data: { verify: true },
     });
 
@@ -136,5 +119,35 @@ export class AuthService {
       status: true,
       message: 'Account successfully verified',
     };
+  }
+
+  private generateToken(user: any): string {
+    return this.jwtService.sign({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, 10);
+  }
+
+  private generateVerificationToken(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  private createUserResponse(user: any): UserResponse {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
+
+  private decodeToken(token: string): any {
+    return this.jwtService.decode(token);
   }
 }
